@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SJY Mobility - Admin Dashboard</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --bg-base: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-hover: #1a1a24;
+            --border-color: rgba(255, 255, 255, 0.05);
+            --primary: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-primary: #ffffff;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 80px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Utility Classes */
+        .glass {
+            background: rgba(18, 18, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+        }
+
+        .text-gradient {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        
+        .w-full { width: 100%; }
+        .h-full { height: 100%; }
+        
+        /* Layout */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            border-right: 1px solid var(--border-color);
+            transition: width var(--transition);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .logo-area {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-links {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: all var(--transition);
+            gap: 1rem;
+            cursor: pointer;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--text-primary);
+            background: rgba(255,255,255,0.02);
+            border-right: 3px solid var(--primary);
+        }
+
+        .nav-item i {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .sidebar.collapsed .nav-text {
+            display: none;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--bg-card);
+            z-index: 90;
+        }
+
+        .page-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Components */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all var(--transition);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+
+        /* Typography */
+        h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; }
+        .text-sm { font-size: 0.875rem; color: var(--text-secondary); }
+        .text-xl { font-size: 1.5rem; font-weight: 700; margin: 0.5rem 0; }
+        
+        /* Badges */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .badge-primary { background: rgba(59, 130, 246, 0.1); color: var(--primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+
+        /* Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        th {
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 0.875rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.02);
+            font-size: 0.875rem;
+            transition: background var(--transition);
+        }
+        tbody tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        /* Maps */
+        #dashboard-map, #fleet-map {
+            width: 100%;
+            border-radius: 12px;
+            z-index: 10;
+        }
+        #dashboard-map { height: 300px; }
+        #fleet-map { height: calc(100vh - 80px); position: absolute; top: 0; left: 0; right: 0; bottom: 0; border-radius: 0; }
+        
+        .leaflet-container {
+            background: #0f1016;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-base); }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .grid-4 { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            .sidebar { position: absolute; transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+        }
+
+        /* Driver/Route Cards */
+        .driver-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .route-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .route-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: var(--primary-gradient);
+        }
+
+        /* Progress Bar */
+        .progress-bg {
+            background: rgba(255,255,255,0.1);
+            height: 6px;
+            border-radius: 3px;
+            width: 100%;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        .progress-fill {
+            background: var(--primary-gradient);
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside class="sidebar glass" id="sidebar">
+        <div class="logo-area">
+            <i data-lucide="zap" style="color: var(--primary); margin-right: 12px;"></i>
+            <h2 class="nav-text text-gradient" style="margin:0; font-size: 1.25rem;">SJY Mobility</h2>
+        </div>
+        <div class="nav-links">
+            <a href="#dashboard" class="nav-item active"><i data-lucide="layout-dashboard"></i> <span class="nav-text">Dashboard</span></a>
+            <a href="#fleet" class="nav-item"><i data-lucide="map"></i> <span class="nav-text">Fleet Map</span></a>
+            <a href="#bookings" class="nav-item"><i data-lucide="calendar-check"></i> <span class="nav-text">Bookings</span></a>
+            <a href="#trips" class="nav-item"><i data-lucide="navigation"></i> <span class="nav-text">Trips</span></a>
+            <a href="#parcels" class="nav-item"><i data-lucide="package"></i> <span class="nav-text">Parcels</span></a>
+            <a href="#revenue" class="nav-item"><i data-lucide="indian-rupee"></i> <span class="nav-text">Revenue</span></a>
+            <a href="#routes" class="nav-item"><i data-lucide="route"></i> <span class="nav-text">Routes & Pricing</span></a>
+            <a href="#drivers" class="nav-item"><i data-lucide="users"></i> <span class="nav-text">Drivers</span></a>
+            <a href="#settings" class="nav-item"><i data-lucide="settings"></i> <span class="nav-text">Settings</span></a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="flex items-center gap-4">
+                <button id="toggle-sidebar" style="background:none; border:none; color:white; cursor:pointer;">
+                    <i data-lucide="menu"></i>
+                </button>
+                <div style="position: relative;">
+                    <i data-lucide="search" style="position: absolute; left: 10px; top: 10px; color: var(--text-secondary); width:18px;"></i>
+                    <input type="text" placeholder="Search bookings, trips, drivers..." style="background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); color: white; padding: 0.5rem 1rem 0.5rem 2.5rem; border-radius: var(--radius-input); width: 300px; outline: none;">
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div style="position: relative; cursor: pointer;">
+                    <i data-lucide="bell"></i>
+                    <span style="position:absolute; top:-5px; right:-5px; background:var(--danger); width:10px; height:10px; border-radius:50%;"></span>
+                </div>
+                <div class="flex items-center gap-2" style="padding-left: 1rem; border-left: 1px solid var(--border-color); cursor: pointer;">
+                    <img src="https://ui-avatars.com/api/?name=Admin&background=3b82f6&color=fff" alt="Admin" style="width:36px; height:36px; border-radius:50%;">
+                    <div class="flex-col">
+                        <span style="font-size:0.875rem; font-weight:500;">Sanjay T.</span>
+                        <span style="font-size:0.75rem; color:var(--text-secondary);">Super Admin</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Pages Container -->
+        <div class="page-container">
+            
+            <!-- Dashboard Page -->
+            <div id="page-dashboard" class="page active">
+                <div class="flex justify-between items-center" style="margin-bottom: 2rem;">
+                    <h1>Overview</h1>
+                    <span class="text-sm">Last updated: Just now</span>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid-4" style="margin-bottom: 2rem;">
+                    <div class="card">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Today's Revenue</span>
+                            <i data-lucide="indian-rupee" style="color: var(--primary);"></i>
+                        </div>
+                        <div class="text-xl counter" data-target="47850" data-prefix="₹">₹0</div>
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-success">+12.5%</span>
+                            <span class="text-sm">vs yesterday</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Active Trips</span>
+                            <i data-lucide="navigation" style="color: var(--warning);"></i>
+                        </div>
+                        <div class="text-xl">8 <span style="font-size:1rem; color:var(--text-secondary);">/ 15</span></div>
+                        <div class="progress-bg"><div class="progress-fill" style="width: 53%;"></div></div>
+                    </div>
+                    <div class="card">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Today's Bookings</span>
+                            <i data-lucide="ticket" style="color: var(--success);"></i>
+                        </div>
+                        <div class="text-xl counter" data-target="67">0</div>
+                        <div class="text-sm" style="color:var(--text-secondary);">Avg 4.2 seats/trip</div>
+                    </div>
+                    <div class="card">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm">Parcels In Transit</span>
+                            <i data-lucide="package" style="color: #8b5cf6;"></i>
+                        </div>
+                        <div class="text-xl counter" data-target="12">0</div>
+                        <div class="text-sm" style="color:var(--text-secondary);">₹1,800 generated today</div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="grid-2" style="margin-bottom: 2rem;">
+                    <div class="card">
+                        <h2>Revenue (Last 7 Days)</h2>
+                        <div style="height: 300px;"><canvas id="revenueChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <h2>Fleet Map (Live)</h2>
+                        <div id="dashboard-map"></div>
+                    </div>
+                </div>
+
+                <!-- Tables Row -->
+                <div class="card">
+                    <div class="flex justify-between items-center" style="margin-bottom: 1rem;">
+                        <h2>Recent Bookings</h2>
+                        <a href="#bookings" style="color:var(--primary); text-decoration:none; font-size:0.875rem;">View All</a>
+                    </div>
+                    <div class="table-container">
+                        <table id="recent-bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Passenger</th>
+                                    <th>Route</th>
+                                    <th>Seats</th>
+                                    <th>Fare</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fleet Map Page -->
+            <div id="page-fleet" class="page" style="padding: 0;">
+                <div id="fleet-map"></div>
+                <div class="glass" style="position: absolute; top: 20px; left: 20px; z-index: 400; padding: 1.5rem; border-radius: 16px; width: 320px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+                    <h2>Fleet Status</h2>
+                    <div class="flex-col gap-4" style="margin-top: 1rem;">
+                        <div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05); border-radius:8px;">
+                            <div class="flex items-center gap-2">
+                                <div style="width:12px; height:12px; border-radius:50%; background:var(--success);"></div>
+                                <span>In Transit</span>
+                            </div>
+                            <strong>8</strong>
+                        </div>
+                        <div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05); border-radius:8px;">
+                            <div class="flex items-center gap-2">
+                                <div style="width:12px; height:12px; border-radius:50%; background:var(--warning);"></div>
+                                <span>Boarding</span>
+                            </div>
+                            <strong>3</strong>
+                        </div>
+                        <div class="flex justify-between items-center p-2" style="background:rgba(255,255,255,0.05); border-radius:8px;">
+                            <div class="flex items-center gap-2">
+                                <div style="width:12px; height:12px; border-radius:50%; background:var(--text-tertiary);"></div>
+                                <span>Parked/Idle</span>
+                            </div>
+                            <strong>4</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bookings Page -->
+            <div id="page-bookings" class="page">
+                <h1>All Bookings</h1>
+                <div class="card">
+                    <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
+                        <div class="flex gap-4">
+                            <select style="background: var(--bg-base); color: white; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px; outline: none;">
+                                <option>All Routes</option>
+                                <option>Indore ↔ Dhar</option>
+                                <option>Indore ↔ Ujjain</option>
+                            </select>
+                            <select style="background: var(--bg-base); color: white; border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px; outline: none;">
+                                <option>All Status</option>
+                                <option>Confirmed</option>
+                                <option>Completed</option>
+                                <option>Pending</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table id="all-bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Passenger</th>
+                                    <th>Phone</th>
+                                    <th>Route</th>
+                                    <th>Seats</th>
+                                    <th>Fare</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Injected via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trips Page -->
+            <div id="page-trips" class="page">
+                <div class="flex justify-between items-center" style="margin-bottom: 1.5rem;">
+                    <h1>Today's Trips</h1>
+                    <button style="background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;" class="flex items-center gap-2">
+                        <i data-lucide="plus" style="width:18px;"></i> New Trip
+                    </button>
+                </div>
+                <div class="grid-3" id="trips-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Drivers Page -->
+            <div id="page-drivers" class="page">
+                <h1>Fleet Drivers</h1>
+                <div class="grid-4" id="drivers-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Routes Page -->
+            <div id="page-routes" class="page">
+                <h1>Routes & Pricing</h1>
+                <div class="grid-3" id="routes-grid">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Revenue Page -->
+            <div id="page-revenue" class="page">
+                <h1>Revenue Analytics</h1>
+                <div class="grid-3" style="margin-bottom: 2rem;">
+                    <div class="card">
+                        <h2>Revenue Split</h2>
+                        <div style="height: 250px;"><canvas id="splitChart"></canvas></div>
+                    </div>
+                    <div class="card" style="grid-column: span 2;">
+                        <h2>Revenue by Route (This Month)</h2>
+                        <div style="height: 250px;"><canvas id="routeRevenueChart"></canvas></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generic Placeholder for other pages -->
+            <div id="page-parcels" class="page"><h1>Parcels Management</h1><div class="card"><p>Module coming soon.</p></div></div>
+            <div id="page-settings" class="page"><h1>System Settings</h1><div class="card"><p>Module coming soon.</p></div></div>
+            
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Data Generation
+        const cities = {
+            indore: { lat: 22.7196, lng: 75.8577, name: 'Indore' },
+            dhar: { lat: 22.5937, lng: 75.3056, name: 'Dhar' },
+            ujjain: { lat: 23.1765, lng: 75.7885, name: 'Ujjain' },
+            dewas: { lat: 22.9676, lng: 76.0534, name: 'Dewas' }
+        };
+
+        const routes = [
+            { from: 'Indore', to: 'Dhar', fare: 250, originalFare: 350, pass: 9999, originalPass: 18000, passRides: 50, distance: '62 km', status: '🟢 2 Ertigas Active (6 Trips/Day)', active: true },
+            { from: 'Dhar', to: 'Indore', fare: 250, originalFare: 350, pass: 9999, originalPass: 18000, passRides: 50, distance: '62 km', status: '🟢 2 Ertigas Active (6 Trips/Day)', active: true },
+            { from: 'Indore', to: 'Ujjain', fare: 180, originalFare: 250, pass: 7500, originalPass: 14000, passRides: 50, distance: '55 km', status: '🔒 Coming Soon', active: false },
+            { from: 'Indore', to: 'Dewas', fare: 160, originalFare: 220, pass: 7000, originalPass: 12000, passRides: 50, distance: '35 km', status: '🔒 Coming Soon', active: false },
+            { from: 'Dhar', to: 'Ujjain', fare: 295, originalFare: 380, pass: null, distance: '110 km', status: '🔒 Coming Soon', active: false },
+            { from: 'Dhar', to: 'Dewas', fare: 255, originalFare: 340, pass: null, distance: '95 km', status: '🔒 Coming Soon', active: false }
+        ];
+
+        const drivers = [
+            "Rajesh Kumar", "Amit Singh", "Vikram Patel", "Suresh Sharma", "Manoj Tiwari",
+            "Deepak Verma", "Anil Yadav", "Rahul Jain", "Prakash Choudhary", "Sunil Rathore",
+            "Ramesh Mishra", "Karan Singh", "Vijay Parmar", "Santosh Gupta", "Dinesh Ahirwar"
+        ];
+
+        const generateVehicles = () => {
+            return drivers.map((driver, i) => {
+                const num = (i + 1).toString().padStart(4, '0');
+                const statuses = ['in_transit', 'boarding', 'parked'];
+                const status = statuses[Math.floor(Math.random() * statuses.length)];
+                
+                // Random position near Indore for mock
+                const lat = 22.7 + (Math.random() - 0.5) * 0.5;
+                const lng = 75.8 + (Math.random() - 0.5) * 0.5;
+
+                return {
+                    reg: `MP09 TA ${num}`,
+                    driver: driver,
+                    status: status,
+                    lat: lat,
+                    lng: lng,
+                    route: routes[Math.floor(Math.random() * 6)] // Pick common routes
+                };
+            });
+        };
+        const vehicles = generateVehicles();
+
+        const generateBookings = (count) => {
+            const passengers = ["Priya", "Sunita", "Ravi", "Neha", "Mohit", "Aarti", "Pooja", "Vikash"];
+            const statuses = ["Confirmed", "Pending", "Completed", "Cancelled"];
+            
+            return Array.from({length: count}).map((_, i) => {
+                const r = routes[Math.floor(Math.random() * 5)]; // One-way routes mostly
+                const p = passengers[Math.floor(Math.random() * passengers.length)];
+                const s = statuses[Math.floor(Math.random() * statuses.length)];
+                const code = `BK-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+                const seats = Math.floor(Math.random() * 3) + 1;
+                
+                return {
+                    code, passenger: `${p} ${drivers[i%10].split(' ')[1]}`, 
+                    phone: `+91 9${Math.floor(Math.random()*900000000)+100000000}`,
+                    route: `${r.from} ↔ ${r.to}`,
+                    seats, fare: r.fare * seats,
+                    status: s,
+                    time: `Today, ${Math.floor(Math.random()*12)+1}:00 PM`
+                };
+            });
+        };
+        const bookings = generateBookings(20);
+
+        // Rendering Functions
+        const renderBookings = () => {
+            const getBadgeClass = (status) => {
+                if(status==='Confirmed') return 'badge-primary';
+                if(status==='Completed') return 'badge-success';
+                if(status==='Pending') return 'badge-warning';
+                return 'badge-danger';
+            };
+
+            const html = bookings.map(b => `
+                <tr>
+                    <td style="font-family:monospace; color:var(--primary);">${b.code}</td>
+                    <td>${b.passenger}</td>
+                    <td>${b.phone || '-'}</td>
+                    <td>${b.route}</td>
+                    <td>${b.seats}</td>
+                    <td>₹${b.fare}</td>
+                    <td><span class="badge ${getBadgeClass(b.status)}">${b.status}</span></td>
+                    <td>${b.time}</td>
+                </tr>
+            `).join('');
+
+            // For dashboard (first 5)
+            const recentHtml = bookings.slice(0,5).map(b => `
+                <tr>
+                    <td style="font-family:monospace; color:var(--primary);">${b.code}</td>
+                    <td>${b.passenger}</td>
+                    <td>${b.route}</td>
+                    <td>${b.seats}</td>
+                    <td>₹${b.fare}</td>
+                    <td><span class="badge ${getBadgeClass(b.status)}">${b.status}</span></td>
+                </tr>
+            `).join('');
+
+            document.querySelector('#all-bookings-table tbody').innerHTML = html;
+            document.querySelector('#recent-bookings-table tbody').innerHTML = recentHtml;
+        };
+
+        const renderDrivers = () => {
+            const html = vehicles.map(v => `
+                <div class="card route-card">
+                    <div class="flex items-center gap-4" style="margin-bottom: 1rem;">
+                        <div class="driver-avatar">${v.driver.charAt(0)}</div>
+                        <div>
+                            <div style="font-weight:600;">${v.driver}</div>
+                            <div class="text-sm" style="font-family:monospace;">${v.reg}</div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span>Today's Trips</span>
+                        <strong>${Math.floor(Math.random()*4)+1}</strong>
+                    </div>
+                    <div class="flex justify-between items-center text-sm" style="margin-top:0.5rem;">
+                        <span>Status</span>
+                        <span style="color: ${v.status === 'in_transit' ? 'var(--success)' : 'var(--text-secondary)'}; text-transform: capitalize;">
+                            ${v.status.replace('_', ' ')}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('drivers-grid').innerHTML = html;
+        };
+
+        const renderRoutes = () => {
+            const html = routes.map(r => `
+                <div class="card route-card" style="${r.active ? 'border: 1px solid var(--primary);' : 'opacity: 0.75;'}">
+                    <div class="flex justify-between items-center" style="margin-bottom: 0.75rem;">
+                        <h2 class="text-gradient">${r.from} ↔ ${r.to}</h2>
+                        <span class="badge ${r.active ? 'badge-success' : ''}" style="${!r.active ? 'background:rgba(255,255,255,0.08); color:var(--text-secondary); border:1px dashed rgba(255,255,255,0.2);' : ''}">
+                            ${r.status}
+                        </span>
+                    </div>
+                    <div class="flex justify-between" style="margin-bottom: 0.5rem;">
+                        <span class="text-sm">Distance</span>
+                        <span>${r.distance}</span>
+                    </div>
+                    <div class="flex justify-between" style="margin-bottom: 0.5rem;">
+                        <span class="text-sm">Single Ride Fare</span>
+                        <div>
+                            <strong style="color:var(--success); font-size:1.1rem;">₹${r.fare}</strong>
+                            ${r.originalFare ? `<span style="text-decoration:line-through; color:var(--text-secondary); font-size:0.875rem; margin-left:4px;">₹${r.originalFare}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm">Fixed Pickup & Drop Pass</span>
+                        <div style="text-align:right;">
+                            ${r.pass ? `<strong style="color:var(--warning); font-size:1.1rem;">₹${r.pass}</strong> <span style="font-size:0.75rem; color:var(--text-secondary);">/ ${r.passRides} Rides</span>` : '<span style="color:var(--text-secondary);">N/A</span>'}
+                            ${r.originalPass ? `<div><span style="text-decoration:line-through; color:var(--text-secondary); font-size:0.75rem;">₹${r.originalPass}</span> <span class="badge badge-success" style="font-size:0.65rem; padding:1px 4px;">Save ₹8,001</span></div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('routes-grid').innerHTML = html;
+        };
+
+        const renderTrips = () => {
+            const html = vehicles.slice(0, 8).map((v, i) => {
+                const seats = Math.floor(Math.random() * 6) + 1;
+                const perc = (seats / 6) * 100;
+                return `
+                <div class="card route-card">
+                    <div class="flex justify-between items-center" style="margin-bottom:1rem;">
+                        <span class="badge badge-primary">SJY-0807-A${i+1}</span>
+                        <span class="text-sm">${v.reg}</span>
+                    </div>
+                    <h3 style="margin-bottom:1rem;">${v.route.from} → ${v.route.to}</h3>
+                    <div style="margin-bottom: 1rem;">
+                        <div class="flex justify-between text-sm">
+                            <span>Seats Filled</span>
+                            <span>${seats}/6</span>
+                        </div>
+                        <div class="progress-bg"><div class="progress-fill" style="width: ${perc}%;"></div></div>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span>Departure</span>
+                        <span>Today, ${10 + i}:00 AM</span>
+                    </div>
+                </div>
+            `}).join('');
+            document.getElementById('trips-grid').innerHTML = html;
+        };
+
+        // Charts Initialization
+        const initCharts = () => {
+            Chart.defaults.color = '#94a3b8';
+            Chart.defaults.font.family = 'Inter';
+
+            // Revenue Line Chart
+            const ctxRev = document.getElementById('revenueChart').getContext('2d');
+            const gradRev = ctxRev.createLinearGradient(0, 0, 0, 400);
+            gradRev.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+            gradRev.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
+            new Chart(ctxRev, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Revenue (₹)',
+                        data: [35000, 42000, 38000, 45000, 41000, 52000, 47850],
+                        borderColor: '#3b82f6',
+                        backgroundColor: gradRev,
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2,
+                        pointBackgroundColor: '#12121a',
+                        pointBorderColor: '#3b82f6',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // Split Chart
+            new Chart(document.getElementById('splitChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passengers', 'Parcels', 'Monthly Passes'],
+                    datasets: [{
+                        data: [65, 15, 20],
+                        backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // Route Revenue Chart
+            new Chart(document.getElementById('routeRevenueChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Indore ↔ Dhar', 'Indore ↔ Ujjain', 'Indore ↔ Dewas', 'Dhar ↔ Ujjain'],
+                    datasets: [{
+                        label: 'Revenue',
+                        data: [125000, 95000, 75000, 45000],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
+                }
+            });
+        };
+
+        // Maps Initialization
+        let dashMap, fleetMap;
+        const initMaps = () => {
+            const mapStyle = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+            
+            // Dashboard Map
+            dashMap = L.map('dashboard-map').setView([22.7196, 75.8577], 9);
+            L.tileLayer(mapStyle, { attribution: '&copy; OpenStreetMap &copy; CARTO' }).addTo(dashMap);
+            
+            // Fleet Map
+            fleetMap = L.map('fleet-map').setView([22.8, 75.6], 9);
+            L.tileLayer(mapStyle).addTo(fleetMap);
+
+            // Add Hubs
+            Object.values(cities).forEach(city => {
+                const icon = L.divIcon({ className: 'custom-div-icon', html: `<div style="background:var(--primary); width:12px; height:12px; border-radius:50%; border:2px solid #000;"></div>`, iconSize: [12, 12] });
+                L.marker([city.lat, city.lng], {icon}).addTo(dashMap).bindTooltip(city.name);
+                L.marker([city.lat, city.lng], {icon}).addTo(fleetMap).bindTooltip(city.name);
+            });
+
+            // Add Vehicles to Fleet Map
+            vehicles.forEach(v => {
+                let color = v.status === 'in_transit' ? 'var(--success)' : (v.status === 'boarding' ? 'var(--warning)' : 'var(--text-tertiary)');
+                const vIcon = L.divIcon({
+                    className: 'custom-car-icon',
+                    html: `<div style="background:${color}; width:16px; height:16px; border-radius:4px; border:2px solid #000; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 10px ${color};"><i data-lucide="car" style="width:10px; color:#000;"></i></div>`,
+                    iconSize: [16, 16]
+                });
+                L.marker([v.lat, v.lng], {icon: vIcon}).addTo(fleetMap).bindPopup(`<b>${v.reg}</b><br>${v.driver}<br>${v.route.from} → ${v.route.to}`);
+            });
+            lucide.createIcons(); // re-init for map icons
+        };
+
+        // Counter Animation
+        const animateCounters = () => {
+            document.querySelectorAll('.counter').forEach(el => {
+                const target = +el.getAttribute('data-target');
+                const prefix = el.getAttribute('data-prefix') || '';
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                
+                const update = () => {
+                    current += step;
+                    if(current < target) {
+                        el.innerText = prefix + Math.ceil(current).toLocaleString('en-IN');
+                        requestAnimationFrame(update);
+                    } else {
+                        el.innerText = prefix + target.toLocaleString('en-IN');
+                    }
+                };
+                update();
+            });
+        };
+
+        // Navigation Routing
+        const handleRoute = () => {
+            const hash = window.location.hash || '#dashboard';
+            
+            // Update Sidebar
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const activeNav = document.querySelector(`.nav-item[href="${hash}"]`);
+            if(activeNav) activeNav.classList.add('active');
+
+            // Update Pages
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            const pageId = `page-${hash.replace('#', '')}`;
+            const activePage = document.getElementById(pageId) || document.getElementById('page-dashboard');
+            activePage.classList.add('active');
+
+            // Map invalidation on resize/show
+            if(hash === '#dashboard' && dashMap) setTimeout(()=> dashMap.invalidateSize(), 100);
+            if(hash === '#fleet' && fleetMap) setTimeout(()=> fleetMap.invalidateSize(), 100);
+        };
+
+        window.addEventListener('hashchange', handleRoute);
+        
+        // Sidebar Toggle
+        document.getElementById('toggle-sidebar').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('collapsed');
+        });
+
+        // Init All
+        document.addEventListener('DOMContentLoaded', () => {
+            renderBookings();
+            renderDrivers();
+            renderRoutes();
+            renderTrips();
+            initCharts();
+            initMaps();
+            animateCounters();
+            handleRoute();
+        });
+
+    </script>
+</body>
+</html>

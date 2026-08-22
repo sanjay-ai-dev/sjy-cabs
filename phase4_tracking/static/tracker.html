@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SJY Mobility - Live Tracking</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    
+    <style>
+        :root {
+            --bg-color: #0a0a0f;
+            --text-color: #ffffff;
+            --accent-color: #00ff88;
+            --panel-bg: rgba(20, 20, 25, 0.85);
+            --speed-green: #00ff88;
+            --speed-yellow: #ffcc00;
+            --speed-red: #ff3333;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        /* Dark theme for Leaflet map tiles */
+        .leaflet-layer,
+        .leaflet-control-zoom-in,
+        .leaflet-control-zoom-out,
+        .leaflet-control-attribution {
+            filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+        }
+        
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0));
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+        
+        .brand {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+        
+        .panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            z-index: 1000;
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        
+        .label {
+            font-size: 12px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .speed-indicator {
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: baseline;
+        }
+        
+        .speed-unit {
+            font-size: 14px;
+            margin-left: 4px;
+            color: #888;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-color);
+            width: 0%;
+            transition: width 1s ease;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--speed-red);
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 10px var(--speed-red);
+        }
+        
+        .status-dot.connected {
+            background: var(--speed-green);
+            box-shadow: 0 0 10px var(--speed-green);
+        }
+        
+        .status-dot.connecting {
+            background: var(--speed-yellow);
+            box-shadow: 0 0 10px var(--speed-yellow);
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+        
+        /* Loading Overlay */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 255, 136, 0.2);
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Car icon styling */
+        .car-marker {
+            transition: transform 0.1s linear;
+        }
+    </style>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+        <div>Connecting to vehicle...</div>
+    </div>
+
+    <div class="header">
+        <div class="brand">SJY Mobility</div>
+    </div>
+
+    <div id="map"></div>
+
+    <div class="panel">
+        <div class="info-row">
+            <div>
+                <div class="label">Vehicle</div>
+                <div class="value" id="vehicle-reg">Loading...</div>
+            </div>
+            <div>
+                <span class="status-dot connecting" id="status-dot"></span>
+                <span id="status-text" class="label">Connecting</span>
+            </div>
+        </div>
+        
+        <div class="info-row" style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
+            <div>
+                <div class="label">Current Speed</div>
+                <div class="speed-indicator" id="speed-display">
+                    0<span class="speed-unit">km/h</span>
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <div class="label">Driver</div>
+                <div class="value" id="driver-name">SJY Driver</div>
+            </div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="info-row">
+                <div class="label" id="origin">Indore</div>
+                <div class="label" id="destination">Destination</div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="trip-progress"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    
+    <script>
+        // Use realistic Indore coordinates for default center
+        const INDORE_LAT = 22.7196;
+        const INDORE_LON = 75.8577;
+        
+        // Map Initialization
+        const map = L.map('map', {
+            zoomControl: false,
+            attributionControl: false
+        }).setView([INDORE_LAT, INDORE_LON], 15);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        // Custom Car Marker SVG
+        const carSvg = `
+            <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="20" cy="20" r="16" fill="rgba(0, 255, 136, 0.2)" stroke="#00ff88" stroke-width="2"/>
+                <path d="M20 8 L28 28 L20 24 L12 28 Z" fill="#00ff88"/>
+            </svg>
+        `;
+        
+        const carIcon = L.divIcon({
+            html: carSvg,
+            className: 'car-marker',
+            iconSize: [40, 40],
+            iconAnchor: [20, 20]
+        });
+
+        let marker = null;
+        let polyline = L.polyline([], {color: '#00ff88', weight: 4, opacity: 0.7, dashArray: '10, 10'}).addTo(map);
+        
+        // Animation variables
+        let currentPos = null;
+        let targetPos = null;
+        let currentHeading = 0;
+        let targetHeading = 0;
+        let animationStartTime = 0;
+        const ANIMATION_DURATION = 1000; // ms
+        
+        // Extract vehicle ID from URL (mock implementation for phase 4)
+        // Assume URL like /r/SJY-0807-A3 mapping to vehicle UUID or just using ID directly
+        // For testing, fallback to a default ID
+        const urlParams = new URLSearchParams(window.location.search);
+        const vehicleId = urlParams.get('vid') || 'test-vehicle-1';
+        
+        document.getElementById('vehicle-reg').textContent = vehicleId;
+        
+        // SSE Connection
+        let eventSource = null;
+        let reconnectTimeout = null;
+        
+        function connectSSE() {
+            updateStatus('connecting');
+            
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            // Adjust API URL based on environment
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'http://localhost:8000' 
+                : 'https://api.sjy.co.in';
+                
+            eventSource = new EventSource(`${apiUrl}/stream/vehicle/${vehicleId}`);
+            
+            eventSource.onopen = () => {
+                updateStatus('connected');
+                hideLoader();
+            };
+            
+            eventSource.onmessage = (event) => {
+                if (event.data === ': heartbeat') return;
+                
+                try {
+                    const data = JSON.parse(event.data);
+                    handlePositionUpdate(data);
+                } catch (e) {
+                    console.error("Error parsing message", e);
+                }
+            };
+            
+            eventSource.onerror = (error) => {
+                console.error("SSE Error:", error);
+                updateStatus('disconnected');
+                eventSource.close();
+                
+                // Exponential backoff reconnect
+                clearTimeout(reconnectTimeout);
+                reconnectTimeout = setTimeout(connectSSE, 3000);
+            };
+        }
+
+        function updateStatus(state) {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('status-text');
+            
+            dot.className = 'status-dot ' + state;
+            
+            if (state === 'connected') {
+                text.textContent = 'Live';
+            } else if (state === 'connecting') {
+                text.textContent = 'Connecting...';
+            } else {
+                text.textContent = 'Offline';
+            }
+        }
+        
+        function hideLoader() {
+            const loader = document.getElementById('loader');
+            if (loader.style.opacity !== '0') {
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
+            }
+        }
+        
+        function updateSpeedColor(speed) {
+            const display = document.getElementById('speed-display');
+            display.innerHTML = \`\${Math.round(speed)}<span class="speed-unit">km/h</span>\`;
+            
+            if (speed < 40) {
+                display.style.color = 'var(--speed-green)';
+            } else if (speed <= 80) {
+                display.style.color = 'var(--speed-yellow)';
+            } else {
+                display.style.color = 'var(--speed-red)';
+            }
+        }
+        
+        function handlePositionUpdate(data) {
+            const lat = parseFloat(data.lat);
+            const lon = parseFloat(data.lon);
+            const speed = parseFloat(data.speed) || 0;
+            const heading = parseFloat(data.heading) || 0;
+            
+            updateSpeedColor(speed);
+            
+            if (!marker) {
+                // First position
+                marker = L.marker([lat, lon], {icon: carIcon}).addTo(map);
+                map.setView([lat, lon], 15);
+                currentPos = {lat, lon};
+                currentHeading = heading;
+                
+                // Apply initial rotation
+                const el = marker.getElement();
+                if (el) {
+                    const svg = el.querySelector('svg');
+                    if (svg) svg.style.transform = \`rotate(\${heading}deg)\`;
+                }
+                
+                polyline.addLatLng([lat, lon]);
+            } else {
+                // Prepare for animation
+                targetPos = {lat, lon};
+                targetHeading = heading;
+                animationStartTime = performance.now();
+                
+                polyline.addLatLng([lat, lon]);
+                
+                // Keep path length reasonable
+                const latlngs = polyline.getLatLngs();
+                if (latlngs.length > 50) {
+                    polyline.setLatLngs(latlngs.slice(-50));
+                }
+                
+                // Pan map smoothly if marker is getting near the edge
+                const bounds = map.getBounds();
+                if (!bounds.contains([lat, lon])) {
+                    map.panTo([lat, lon]);
+                }
+                
+                requestAnimationFrame(animateMarker);
+            }
+        }
+        
+        function animateMarker(timestamp) {
+            if (!currentPos || !targetPos) return;
+            
+            let progress = (timestamp - animationStartTime) / ANIMATION_DURATION;
+            if (progress > 1) progress = 1;
+            
+            // Linear interpolation
+            const lat = currentPos.lat + (targetPos.lat - currentPos.lat) * progress;
+            const lon = currentPos.lon + (targetPos.lon - currentPos.lon) * progress;
+            
+            marker.setLatLng([lat, lon]);
+            
+            // Interpolate heading (handling 360 wrap-around)
+            let hDiff = targetHeading - currentHeading;
+            if (hDiff > 180) hDiff -= 360;
+            if (hDiff < -180) hDiff += 360;
+            
+            const heading = currentHeading + hDiff * progress;
+            
+            const el = marker.getElement();
+            if (el) {
+                const svg = el.querySelector('svg');
+                if (svg) svg.style.transform = \`rotate(\${heading}deg)\`;
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(animateMarker);
+            } else {
+                currentPos = {...targetPos};
+                currentHeading = targetHeading;
+            }
+        }
+        
+        // Mock progress update
+        setInterval(() => {
+            const bar = document.getElementById('trip-progress');
+            let w = parseFloat(bar.style.width) || 0;
+            if (w < 100) {
+                w += 0.5;
+                bar.style.width = w + '%';
+            }
+        }, 5000);
+
+        // Start connection
+        connectSSE();
+        
+    </script>
+</body>
+</html>

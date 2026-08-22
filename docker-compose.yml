@@ -1,0 +1,126 @@
+# ═══════════════════════════════════════════════════════════════
+# SJY Mobility — Docker Compose (Anti-Gravity Infrastructure)
+# Zero-cost stack: PostgreSQL+PostGIS, Redis, OSRM, Ollama
+# ═══════════════════════════════════════════════════════════════
+
+services:
+  # ── PostgreSQL 16 + PostGIS 3.4 ──
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: sjy-postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: sjy_mobility
+      POSTGRES_USER: sjy
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-sjy_dev_2026}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./phase1_ingestion/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sjy -d sjy_mobility"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis 7 (In-Memory Vehicle State + Pub/Sub) ──
+  redis:
+    image: redis:7-alpine
+    container_name: sjy-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+      --save 60 100
+      --loglevel warning
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ── OSRM (Self-Hosted Routing Engine — Malwa Region) ──
+  # NOTE: Before first run, process OSM data:
+  #   1. Download: wget https://download.geofabrik.de/asia/india/central-latest.osm.pbf -O osrm-data/central.osm.pbf
+  #   2. Extract:  docker run -t -v $(pwd)/osrm-data:/data osrm/osrm-backend osrm-extract -p /opt/car.lua /data/central.osm.pbf
+  #   3. Partition: docker run -t -v $(pwd)/osrm-data:/data osrm/osrm-backend osrm-partition /data/central.osrm
+  #   4. Customize: docker run -t -v $(pwd)/osrm-data:/data osrm/osrm-backend osrm-customize /data/central.osrm
+  osrm:
+    image: osrm/osrm-backend
+    container_name: sjy-osrm
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./osrm-data:/data:ro
+    command: osrm-routed --algorithm mld --max-table-size 1000 /data/central.osrm
+    profiles:
+      - with-osrm  # Only start when OSRM data is prepared
+
+  # ── Ollama (Local LLM for NLP Parsing) ──
+  ollama:
+    image: ollama/ollama
+    container_name: sjy-ollama
+    restart: always
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          memory: 8G
+
+  # ── FastAPI Application Server ──
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sjy-api
+    restart: always
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file: .env
+    command: >
+      uvicorn phase2_dispatch.main:app
+      --host 0.0.0.0
+      --port 8000
+      --workers 4
+      --loop uvloop
+      --http httptools
+
+  # ── GPS TCP Ingestion Server ──
+  tcp_ingestion:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sjy-tcp
+    restart: always
+    ports:
+      - "9000:9000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    env_file: .env
+    command: python -m phase1_ingestion.tcp_server
+
+volumes:
+  pgdata:
+    driver: local
+  redisdata:
+    driver: local
+  ollama_models:
+    driver: local

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Driver Cockpit - SJY Cabs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-obsidian: #06070a;
+            --bg-card: rgba(15, 18, 28, 0.85);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --cyan-primary: #00f2fe;
+            --cyan-secondary: #4facfe;
+            --emerald: #10b981;
+            --warning: #f59e0b;
+            --panic: #ef4444;
+            --pink-rose: #ec4899;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --font-display: 'Plus Jakarta Sans', sans-serif;
+            --font-body: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #000;
+            color: var(--text-primary);
+            font-family: var(--font-body);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .mobile-wrapper {
+            width: 100%;
+            max-width: 430px;
+            background: var(--bg-obsidian);
+            position: relative;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,242,254,0.05);
+        }
+
+        /* Hide scrollbar */
+        .mobile-wrapper::-webkit-scrollbar {
+            display: none;
+        }
+
+        header.cockpit-bar {
+            padding: 16px 20px;
+            background: linear-gradient(180deg, rgba(6,7,10,0.95) 0%, rgba(6,7,10,0.8) 100%);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-glass);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .driver-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .driver-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 18px;
+            color: #000;
+            border: 2px solid #000;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+        }
+
+        .driver-details h1 {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .driver-details p {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rating-star {
+            color: var(--warning);
+        }
+
+        .duty-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-family: var(--font-display);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--emerald);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .duty-toggle.off {
+            background: rgba(156, 163, 175, 0.1);
+            border-color: rgba(156, 163, 175, 0.3);
+            color: var(--text-secondary);
+            box-shadow: none;
+        }
+
+        .duty-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+        }
+        .duty-toggle.off .duty-dot {
+            background: var(--text-secondary);
+            box-shadow: none;
+        }
+
+        .header-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-family: var(--font-display);
+        }
+
+        .vehicle-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-glass);
+            color: #fff;
+            letter-spacing: 0.5px;
+        }
+
+        .telemetry {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--emerald);
+        }
+
+        .telemetry-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--emerald);
+            border-radius: 50%;
+            animation: pulse-telemetry 2s infinite;
+        }
+
+        @keyframes pulse-telemetry {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Tabs content area */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for nav */
+            flex-grow: 1;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Generic Card Style */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px -5px rgba(0, 242, 254, 0.05);
+        }
+
+        /* TODAY TAB */
+        .hero-trip-card .route-banner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .route-points {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #fff, var(--cyan-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .route-distance {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+        }
+
+        .trip-status {
+            background: rgba(0, 242, 254, 0.1);
+            color: var(--cyan-primary);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            font-family: var(--font-display);
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .radar-ring {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--cyan-primary);
+            position: relative;
+        }
+        .radar-ring::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid var(--cyan-primary);
+            animation: radar 2s infinite ease-out;
+        }
+        @keyframes radar {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .trip-times {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .occupancy-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--font-display);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+        }
+
+        .seats-fill {
+            width: 83.3%;
+            background: linear-gradient(90deg, var(--cyan-primary), var(--cyan-secondary));
+        }
+
+        .parcel-fill {
+            width: 50%;
+            background: linear-gradient(90deg, var(--warning), #fcd34d);
+        }
+
+        /* Next Stop Target Card */
+        .next-target {
+            border: 1px solid rgba(0, 242, 254, 0.3);
+            background: linear-gradient(180deg, rgba(15, 18, 28, 0.9) 0%, rgba(0, 242, 254, 0.05) 100%);
+            box-shadow: 0 0 30px rgba(0, 242, 254, 0.1);
+        }
+
+        .target-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .target-title {
+            font-family: var(--font-display);
+            font-size: 11px;
+            color: var(--cyan-primary);
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .target-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--emerald);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .target-customer {
+            font-family: var(--font-display);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .target-location {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .target-eta {
+            display: inline-block;
+            background: rgba(255,255,255,0.05);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .btn {
+            padding: 12px;
+            border-radius: 12px;
+            border: none;
+            font-family: var(--font-display);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s ease;
+        }
+
+        .btn:active {
+            transform: scale(0.97);
+        }
+
+        .btn-nav {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-call {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .btn-complete {
+            grid-column: span 2;
+            background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-secondary));
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        /* Visual Seat Map */
+        .seat-map-title {
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .vehicle-layout {
+            border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 24px;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .row:last-child {
+            margin-bottom: 0;
+            padding-top: 16px;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+        }
+
+        .seat {
+            width: 60px;
+            height: 60px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--text-secondary);
+            position: relative;
+            text-align: center;
+            padding: 4px;
+            line-height: 1.2;
+        }
+
+        .seat.driver {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+            color: #fff;
+        }
+
+        .seat.booked {
+            background: rgba(0, 242, 254, 0.15);
+            border-color: var(--cyan-primary);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .seat.ladies {
+            background: rgba(236, 72, 153, 0.15);
+            border-color: var(--pink-rose);
+        }
+
+        .seat.empty {
+            border-style: dashed;
+        }
+
+        .seat-icon {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .parcel-area {
+            text-align: center;
+            color: var(--warning);
+            font-weight: 700;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* MANIFEST TAB */
+        .manifest-timeline {
+            position: relative;
+            padding-left: 24px;
+        }
+
+        .manifest-timeline::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 10px;
+            bottom: 30px;
+            width: 2px;
+            background: var(--border-glass);
+        }
+
+        .manifest-step {
+            position: relative;
+            margin-bottom: 24px;
+            opacity: 0.5;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .manifest-step.completed {
+            opacity: 0.7;
+        }
+
+        .manifest-step.active {
+            opacity: 1;
+        }
+
+        .step-dot {
+            position: absolute;
+            left: -24px;
+            top: 4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--bg-obsidian);
+            border: 2px solid var(--text-secondary);
+            z-index: 2;
+        }
+
+        .manifest-step.completed .step-dot {
+            background: var(--emerald);
+            border-color: var(--emerald);
+        }
+        
+        .manifest-step.active .step-dot {
+            background: var(--cyan-primary);
+            border-color: var(--cyan-primary);
+            box-shadow: 0 0 10px var(--cyan-primary);
+        }
+
+        .step-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .manifest-step.active .step-time {
+            color: var(--cyan-primary);
+        }
+
+        .step-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-glass);
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .manifest-step.active .step-card {
+            background: rgba(0, 242, 254, 0.05);
+            border-color: rgba(0, 242, 254, 0.3);
+        }
+
+        .step-type {
+            font-size: 10px;
+            font-weight: 800;
+            font-family: var(--font-display);
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .step-details {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+
+        .filter-tab {
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-glass);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+        .filter-tab.active {
+            background: rgba(0, 242, 254, 0.15);
+            color: var(--cyan-primary);
+            border-color: var(--cyan-primary);
+        }
+
+        /* EARNINGS TAB */
+        .earnings-hero {
+            text-align: center;
+            padding: 24px 0;
+        }
+        
+        .earnings-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .earnings-amount {
+            font-family: var(--font-display);
+            font-size: 48px;
+            font-weight: 800;
+            color: var(--emerald);
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+            margin-bottom: 16px;
+        }
+
+        .earnings-breakdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+        }
+
+        .earnings-stat {
+            background: rgba(255,255,255,0.05);
+            padding: 12px;
+            border-radius: 12px;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .earnings-stat-val {
+            font-family: var(--font-display);
+            font-size: 20px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        .chart-container {
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            padding-top: 20px;
+            border-bottom: 1px solid var(--border-glass);
+            margin-bottom: 20px;
+        }
+        
+        .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100%;
+        }
+
+        .bar {
+            width: 100%;
+            max-width: 24px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px 4px 0 0;
+            transition: height 0.5s ease;
+        }
+        .bar.active {
+            background: var(--emerald);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .bar-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* PROFILE TAB */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--cyan-primary), var(--cyan-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 32px;
+            color: #000;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+        .info-label { color: var(--text-secondary); }
+        .info-val { font-weight: 600; text-align: right;}
+
+        .btn-sos {
+            width: 100%;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--panic);
+            border: 1px solid var(--panic);
+            margin-top: 24px;
+            padding: 16px;
+            font-size: 16px;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 64px;
+            background: rgba(15, 18, 28, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: 32px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 0 10px;
+            z-index: 100;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            z-index: 2;
+            transition: color 0.3s ease;
+        }
+
+        .nav-item.active {
+            color: var(--cyan-primary);
+        }
+
+        .nav-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .nav-indicator {
+            position: absolute;
+            top: 50%;
+            left: 25px;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 242, 254, 0.1);
+            border-radius: 50%;
+            z-index: 1;
+            transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="mobile-wrapper">
+    <!-- COCKPIT HEADER -->
+    <header class="cockpit-bar">
+        <div class="header-top">
+            <div class="driver-info">
+                <div class="driver-avatar">R</div>
+                <div class="driver-details">
+                    <h1>Rajesh Sharma</h1>
+                    <p>4.9 <span class="rating-star">★</span> (214 trips)</p>
+                </div>
+            </div>
+            <button class="duty-toggle" id="dutyToggle" onclick="toggleDuty()">
+                <div class="duty-dot"></div>
+                <span id="dutyText">ON DUTY</span>
+            </button>
+        </div>
+        <div class="header-bottom">
+            <div class="vehicle-badge">MP09 AB 1001</div>
+            <div class="telemetry">
+                <div class="telemetry-dot"></div>
+                GPS Online (10s)
+            </div>
+        </div>
+    </header>
+
+    <!-- TAB: TODAY (ACTIVE TRIP) -->
+    <div id="today" class="tab-content active">
+        <!-- Hero Active Trip -->
+        <div class="glass-card hero-trip-card">
+            <div class="route-banner">
+                <div class="route-points">Dhar ➔ Indore</div>
+                <div class="trip-status">
+                    <div class="radar-ring"></div>
+                    IN TRANSIT
+                </div>
+            </div>
+            <div class="route-distance">62 km Route</div>
+            
+            <div class="trip-times" style="margin-top: 12px;">
+                <div><strong>Dep:</strong> 08:00 AM</div>
+                <div><strong>ETA:</strong> 09:30 AM</div>
+            </div>
+
+            <div class="occupancy-stats">
+                <div class="stat-row">
+                    <div class="stat-header">
+                        <span>Passenger Seats</span>
+                        <span>5/6 Booked</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill seats-fill"></div>
+                    </div>
+                </div>
+                <div class="stat-row">
+                    <div class="stat-header">
+                        <span>Parcel Slots</span>
+                        <span>3/6 Booked</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill parcel-fill"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Stop Target Card -->
+        <div class="glass-card next-target" id="nextStopCard">
+            <div class="target-header">
+                <div class="target-title">NEXT TARGET STOP</div>
+                <div class="target-badge">PICKUP PASSENGER</div>
+            </div>
+            <div class="target-customer">Priya Patel</div>
+            <div class="target-location">Pithampur Chowk Bypass, Dhar</div>
+            <div class="target-eta">ETA: in 8 mins (4.2 km away)</div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-nav" onclick="alert('Opening Google Maps...')">🗺️ Navigate</button>
+                <button class="btn btn-call" onclick="window.location.href='tel:919876543210'">📞 Call</button>
+                <button class="btn btn-complete" onclick="markNextStopCompleted()">✅ MARK ARRIVED / COMPLETED</button>
+            </div>
+        </div>
+
+        <!-- Seat Map -->
+        <div class="glass-card">
+            <div class="seat-map-title">Vehicle Manifest (Ertiga 7-Str)</div>
+            <div class="vehicle-layout">
+                <div class="row">
+                    <div class="seat driver">
+                        <div class="seat-icon"> steering </div>
+                        Driver
+                    </div>
+                    <div class="seat booked ladies">
+                        <div class="seat-icon">♀</div>
+                        Priya (1)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="seat booked">
+                        <div class="seat-icon">👤</div>
+                        Raju (2)
+                    </div>
+                    <div class="seat booked">
+                        <div class="seat-icon">👤</div>
+                        Amit (3)
+                    </div>
+                    <div class="seat booked">
+                        <div class="seat-icon">👤</div>
+                        Sunita(4)
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="seat booked">
+                        <div class="seat-icon">👤</div>
+                        Kavita(5)
+                    </div>
+                    <div class="seat empty">
+                        <div class="seat-icon">💺</div>
+                        EMPTY
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="parcel-area">
+                        📦 Rear Cargo: 3/6 Parcel Boxes Loaded
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: MANIFEST TIMELINE -->
+    <div id="manifest" class="tab-content">
+        <h2 style="font-family: var(--font-display); font-size: 18px; margin-bottom: 16px;">Trip Manifest</h2>
+        
+        <div class="filter-tabs">
+            <div class="filter-tab active">All Stops</div>
+            <div class="filter-tab">Pickups</div>
+            <div class="filter-tab">Deliveries</div>
+        </div>
+
+        <div class="manifest-timeline">
+            <div class="manifest-step completed">
+                <div class="step-dot"></div>
+                <div class="step-time">08:00 AM</div>
+                <div class="step-card">
+                    <div class="step-type" style="color: var(--emerald);">✅ PICKUP</div>
+                    <div class="step-details"><strong>Raju Sharma</strong> @ Dhar Bus Stand</div>
+                </div>
+            </div>
+            
+            <div class="manifest-step completed">
+                <div class="step-dot"></div>
+                <div class="step-time">08:10 AM</div>
+                <div class="step-card">
+                    <div class="step-type" style="color: var(--emerald);">✅ PARCEL PICKUP</div>
+                    <div class="step-details"><strong>Gupta Traders</strong> @ Dhar Market</div>
+                </div>
+            </div>
+
+            <div class="manifest-step active" id="manifestStep3">
+                <div class="step-dot"></div>
+                <div class="step-time">08:25 AM - CURRENT</div>
+                <div class="step-card">
+                    <div class="step-type" style="color: var(--cyan-primary);">🔵 PICKUP</div>
+                    <div class="step-details"><strong>Priya Patel</strong> @ Pithampur Chowk</div>
+                </div>
+            </div>
+
+            <div class="manifest-step" id="manifestStep4">
+                <div class="step-dot"></div>
+                <div class="step-time">09:10 AM</div>
+                <div class="step-card">
+                    <div class="step-type">⬜ PARCEL DROP</div>
+                    <div class="step-details"><strong>Kumar Electronics</strong> @ Sarafa Bazaar, Indore</div>
+                </div>
+            </div>
+
+            <div class="manifest-step">
+                <div class="step-dot"></div>
+                <div class="step-time">09:20 AM</div>
+                <div class="step-card">
+                    <div class="step-type">⬜ DROP</div>
+                    <div class="step-details"><strong>Raju & Priya</strong> @ Rajwada, Indore</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: EARNINGS -->
+    <div id="earnings" class="tab-content">
+        <div class="earnings-hero">
+            <div class="earnings-title">Today's Earnings</div>
+            <div class="earnings-amount">₹3,250</div>
+            <div class="earnings-title" style="margin-bottom: 24px;">3 / 5 Trips Completed</div>
+            
+            <div class="earnings-breakdown">
+                <div class="earnings-stat">
+                    <div class="earnings-title">Passengers</div>
+                    <div class="earnings-stat-val" style="color: var(--cyan-primary);">₹2,600</div>
+                </div>
+                <div class="earnings-stat">
+                    <div class="earnings-title">Parcels</div>
+                    <div class="earnings-stat-val" style="color: var(--warning);">₹650</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-card">
+            <div class="stat-header" style="margin-bottom: 16px;">
+                <span>This Week</span>
+                <span style="color: var(--emerald);">₹19,400</span>
+            </div>
+            
+            <!-- Simple CSS Bar Chart -->
+            <div class="chart-container">
+                <div class="bar-col"><div class="bar" style="height: 40%;"></div><div class="bar-label">Mon</div></div>
+                <div class="bar-col"><div class="bar" style="height: 60%;"></div><div class="bar-label">Tue</div></div>
+                <div class="bar-col"><div class="bar" style="height: 50%;"></div><div class="bar-label">Wed</div></div>
+                <div class="bar-col"><div class="bar" style="height: 80%;"></div><div class="bar-label">Thu</div></div>
+                <div class="bar-col"><div class="bar active" style="height: 100%;"></div><div class="bar-label">Fri</div></div>
+                <div class="bar-col"><div class="bar" style="height: 20%;"></div><div class="bar-label">Sat</div></div>
+                <div class="bar-col"><div class="bar" style="height: 10%;"></div><div class="bar-label">Sun</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB: PROFILE -->
+    <div id="profile" class="tab-content">
+        <div class="glass-card">
+            <div class="profile-header">
+                <div class="profile-avatar">R</div>
+                <div>
+                    <h2 style="font-family: var(--font-display); margin-bottom: 4px;">Rajesh Sharma</h2>
+                    <p style="color: var(--text-secondary); font-size: 14px;">DL: MP09 DL 2021 987654</p>
+                </div>
+            </div>
+            
+            <div class="info-row">
+                <span class="info-label">Vehicle</span>
+                <span class="info-val">Maruti Ertiga VXi</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Reg Number</span>
+                <span class="info-val">MP09 AB 1001</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Fuel Level</span>
+                <span class="info-val" style="color: var(--emerald);">75%</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Tire Pressure</span>
+                <span class="info-val" style="color: var(--emerald);">OK</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Safety Score</span>
+                <span class="info-val" style="color: var(--emerald);">98 / 100</span>
+            </div>
+
+            <button class="btn btn-sos" onclick="confirmSOS()">🚨 EMERGENCY SOS</button>
+        </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+        <div class="nav-indicator" id="navIndicator"></div>
+        <div class="nav-item active" onclick="switchTab('today', 0, this)">
+            <div class="nav-icon">🚗</div>
+            Today
+        </div>
+        <div class="nav-item" onclick="switchTab('manifest', 1, this)">
+            <div class="nav-icon">📋</div>
+            Manifest
+        </div>
+        <div class="nav-item" onclick="switchTab('earnings', 2, this)">
+            <div class="nav-icon">₹</div>
+            Earnings
+        </div>
+        <div class="nav-item" onclick="switchTab('profile', 3, this)">
+            <div class="nav-icon">👤</div>
+            Profile
+        </div>
+    </nav>
+</div>
+
+<script>
+    // Tab Switching Logic
+    function switchTab(tabId, index, element) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        // Remove active class from nav items
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.classList.remove('active');
+        });
+
+        // Show selected tab
+        document.getElementById(tabId).classList.add('active');
+        element.classList.add('active');
+
+        // Move indicator (approx 95px per tab based on flex layout)
+        const indicator = document.getElementById('navIndicator');
+        const positions = ['25px', '25%', '50%', '75%'];
+        // Precise calculation based on actual DOM could be better, but this works for fixed 4 items.
+        // Assuming equal distribution: 
+        const width = element.parentElement.offsetWidth;
+        const itemWidth = width / 4;
+        const centerOffset = (index * itemWidth) + (itemWidth / 2);
+        indicator.style.left = `${centerOffset}px`;
+    }
+
+    // Initialize indicator position
+    window.addEventListener('DOMContentLoaded', () => {
+        const firstNav = document.querySelector('.nav-item.active');
+        if(firstNav) {
+            const width = firstNav.parentElement.offsetWidth;
+            const itemWidth = width / 4;
+            const centerOffset = itemWidth / 2;
+            document.getElementById('navIndicator').style.left = `${centerOffset}px`;
+        }
+    });
+
+    // Duty Toggle
+    let isOnDuty = true;
+    function toggleDuty() {
+        const toggle = document.getElementById('dutyToggle');
+        const text = document.getElementById('dutyText');
+        isOnDuty = !isOnDuty;
+        
+        if (isOnDuty) {
+            toggle.classList.remove('off');
+            text.innerText = "ON DUTY";
+        } else {
+            toggle.classList.add('off');
+            text.innerText = "OFF DUTY";
+        }
+    }
+
+    // Mark Stop Completed
+    function markNextStopCompleted() {
+        if(confirm('Mark pickup for Priya Patel as completed?')) {
+            const card = document.getElementById('nextStopCard');
+            card.innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 32px; margin-bottom: 12px;">✅</div>
+                    <h3 style="color: var(--emerald); font-family: var(--font-display);">Stop Completed</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px; margin-top: 8px;">Manifest updated automatically.</p>
+                </div>
+            `;
+            
+            // Update Manifest Timeline
+            const step3 = document.getElementById('manifestStep3');
+            step3.classList.remove('active');
+            step3.classList.add('completed');
+            step3.querySelector('.step-time').innerText = '08:25 AM';
+            step3.querySelector('.step-type').style.color = 'var(--emerald)';
+            step3.querySelector('.step-type').innerText = '✅ PICKUP';
+
+            // Make step 4 active
+            const step4 = document.getElementById('manifestStep4');
+            step4.classList.add('active');
+            step4.querySelector('.step-time').innerText += ' - CURRENT';
+            step4.querySelector('.step-type').style.color = 'var(--cyan-primary)';
+            step4.querySelector('.step-type').innerText = '🔵 PARCEL DROP';
+        }
+    }
+
+    // SOS
+    function confirmSOS() {
+        if(confirm('🚨 ARE YOU SURE YOU WANT TO TRIGGER SOS? This will alert authorities and SJY Cabs support immediately.')) {
+            alert('SOS TRIGGERED. Support team is calling you now.');
+        }
+    }
+</script>
+
+</body>
+</html>
