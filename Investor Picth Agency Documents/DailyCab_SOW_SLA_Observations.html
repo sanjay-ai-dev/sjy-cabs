@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  @page { size: A4; margin: 0; }
+  
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #111827;
+    background: #fff;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .top-bar { height: 6px; background: linear-gradient(90deg, #059669, #f59e0b, transparent); }
+  
+  .header {
+    padding: 16px 36px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.5px solid #e5e7eb;
+  }
+  
+  .logo-text { font-size: 30px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+  .logo-daily { color: #059669; }
+  .logo-cab { color: #f59e0b; }
+  .logo-dot { display: inline-block; width: 7px; height: 7px; background: #059669; border-radius: 50%; margin-left: 2px; vertical-align: middle; }
+  .logo-line { height: 3px; background: linear-gradient(90deg, #059669, #f59e0b, transparent); border-radius: 2px; margin-top: 3px; }
+  .logo-subtitle { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 2.5px; color: #6b7280; margin-top: 3px; }
+  
+  .company-info { text-align: right; font-size: 10px; color: #4b5563; line-height: 1.45; }
+  .company-info strong { color: #111827; font-size: 11px; }
+  
+  .content { padding: 14px 36px 0; }
+  
+  .doc-title { font-size: 18px; font-weight: 800; color: #111827; text-align: center; margin-bottom: 2px; }
+  .doc-subtitle { font-size: 11px; font-weight: 600; color: #4b5563; text-align: center; margin-bottom: 10px; }
+  
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5px;
+    color: #4b5563;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .meta-row strong { color: #111827; }
+  
+  .intro { font-size: 11px; line-height: 1.45; color: #1f2937; margin-bottom: 10px; font-weight: 450; }
+  
+  .observation { margin-bottom: 9px; }
+  
+  .obs-header { display: flex; align-items: center; margin-bottom: 2px; }
+  .obs-number {
+    width: 20px; height: 20px;
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 800; margin-right: 8px; flex-shrink: 0;
+  }
+  .obs-title { font-size: 12.5px; font-weight: 700; color: #111827; }
+  .obs-ref { font-size: 9.5px; color: #6b7280; font-style: italic; margin-left: 8px; font-weight: 500; }
+  
+  .obs-body {
+    font-size: 11px; line-height: 1.42; color: #1f2937;
+    margin-left: 28px; padding-left: 10px;
+    border-left: 2.5px solid #10b981;
+  }
+  
+  .closing {
+    margin-top: 10px;
+    font-size: 10.5px; line-height: 1.4; color: #1f2937;
+    font-style: italic;
+    padding-top: 8px;
+    border-top: 1px solid #e5e7eb;
+  }
+  
+  .signature-block { margin-top: 10px; }
+  .sig-name { font-size: 14px; font-weight: 800; color: #111827; }
+  .sig-title { font-size: 10.5px; color: #4b5563; font-weight: 600; margin-top: 1px; }
+  .sig-contact { font-size: 9.5px; color: #6b7280; margin-top: 3px; line-height: 1.4; }
+  
+  .footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 10px 36px;
+    border-top: 1.5px solid #e5e7eb;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #fff;
+  }
+  .footer-left, .footer-right { font-size: 8.5px; color: #6b7280; font-weight: 500; }
+  .footer-right { text-align: right; }
+  .footer-bar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #059669, #f59e0b, transparent); }
+
+  .confidential-badge {
+    display: inline-block; font-size: 8px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: #dc2626; border: 1px solid #fecaca;
+    border-radius: 3px; padding: 1px 6px; margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<div class="header">
+  <div class="logo-area">
+    <div class="logo-text"><span class="logo-daily">Daily</span><span class="logo-cab">Cab</span><span class="logo-dot"></span></div>
+    <div class="logo-line"></div>
+    <div class="logo-subtitle">Premium Daily Cab Service</div>
+    <div class="confidential-badge">Confidential</div>
+  </div>
+  <div class="company-info">
+    <strong>DailyCab</strong><br>
+    15, Bandichhod Marg, Sharda Nagar<br>
+    Dhar, Madhya Pradesh 454001<br>
+    founder@dailycab.in | +91-8109745019<br>
+    www.dailycab.in
+  </div>
+</div>
+
+<div class="content">
+  <div class="doc-title">Observations & Clarifications</div>
+  <div class="doc-subtitle">SOW (Draft v0.1) & SLA (Draft v0.1) — DailyCab Capital Raise & Launch Advisory</div>
+
+  <div class="meta-row">
+    <div><strong>To:</strong> Project 8 Advisory, Mumbai &nbsp;|&nbsp; <strong>Attn:</strong> Mr. Anish Gaonkar, Managing Director</div>
+    <div><strong>Date:</strong> 3 September 2026</div>
+  </div>
+
+  <div class="intro">
+    Dear Mr. Gaonkar, thank you for sharing the SOW and SLA. Both documents are comprehensive and well-structured. I have the following observations and request clarity before we proceed:
+  </div>
+
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">1</div>
+      <div class="obs-title">Fee Structure & Quotation</div>
+      <span class="obs-ref">— SOW §11</span>
+    </div>
+    <div class="obs-body">
+      The SOW references a separate Quotation for fees, payment schedule, and success fee terms — this was not included. Kindly share the complete Quotation to evaluate commercial terms including retainer, success fee %, and whether retainer is adjustable against the success fee.
+    </div>
+  </div>
+
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">2</div>
+      <div class="obs-title">Tail Period — Post-Termination Success Fee</div>
+      <span class="obs-ref">— SLA §11</span>
+    </div>
+    <div class="obs-body">
+      The 12-month tail period appears extended for an early-stage engagement. I propose revising this to 6 months, applicable only to investors with whom active meetings were conducted — not merely target list names.
+    </div>
+  </div>
+
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">3</div>
+      <div class="obs-title">Existing Assets & Scope Adjustment</div>
+      <span class="obs-ref">— SOW §3 (A1–A6)</span>
+    </div>
+    <div class="obs-body">
+      DailyCab has already built a live investor portal, financial model with simulation, DPR, brand identity, NDA framework, and a functional platform at <strong>dailycab.in</strong>. Since several Workstream A deliverables overlap, I would like to discuss a scope reduction and fee adjustment.
+    </div>
+  </div>
+
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">4</div>
+      <div class="obs-title">Alternative Fee Structure — Success-Aligned Model</div>
+      <span class="obs-ref">— SOW §11, SLA §8</span>
+    </div>
+    <div class="obs-body">
+      As a bootstrapped, pre-revenue venture, I would like to explore a reduced/zero retainer model with a higher success fee — ensuring both parties' financial incentives are fully aligned with a successful outcome.
+    </div>
+  </div>
+
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">5</div>
+      <div class="obs-title">Jurisdiction & NDA Alignment</div>
+      <span class="obs-ref">— SLA §13</span>
+    </div>
+    <div class="obs-body">
+      The SLA designates Mumbai for disputes; our NDA specifies Madhya Pradesh. I prefer <strong>Indore</strong> as a mutual compromise. Also, kindly share the specific NDA points you'd like to re-examine.
+    </div>
+  </div>
+
+  <div class="closing">
+    Looking forward to receiving the Quotation and your thoughts. Happy to discuss on a call at your convenience.
+  </div>
+
+  <div class="signature-block">
+    <div class="sig-name">Sanjay Thakur</div>
+    <div class="sig-title">Founder & Sole Proprietor, DailyCab</div>
+    <div class="sig-contact">
+      founder@dailycab.in &nbsp;|&nbsp; +91-8109745019 &nbsp;|&nbsp; www.dailycab.in
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-left">DailyCab — Confidential & Proprietary</div>
+  <div class="footer-right">Ref: DC/OBS/P8/2026-09-03</div>
+</div>
+<div class="footer-bar"></div>
+
+</body>
+</html>

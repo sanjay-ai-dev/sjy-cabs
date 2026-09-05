@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Project 8 Advisory NDA Amendments — Founder's Strategic Review</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  @page { size: A4; margin: 0; }
+  
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #111827;
+    background: #fff;
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .top-bar { height: 6px; background: linear-gradient(90deg, #059669, #f59e0b, #059669); }
+  
+  .header {
+    padding: 16px 36px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.5px solid #e5e7eb;
+  }
+  
+  .logo-text { font-size: 28px; font-weight: 900; letter-spacing: -1px; line-height: 1; }
+  .logo-daily { color: #059669; }
+  .logo-cab { color: #f59e0b; }
+  .logo-dot { display: inline-block; width: 7px; height: 7px; background: #059669; border-radius: 50%; margin-left: 2px; vertical-align: middle; }
+  .logo-line { height: 3px; background: linear-gradient(90deg, #059669, #f59e0b, transparent); border-radius: 2px; margin-top: 3px; }
+  .logo-subtitle { font-size: 8px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; color: #6b7280; margin-top: 3px; }
+  
+  .company-info { text-align: right; font-size: 9.5px; color: #4b5563; line-height: 1.4; }
+  .company-info strong { color: #111827; font-size: 10.5px; }
+  
+  .content { padding: 14px 36px 0; }
+  
+  .doc-title { font-size: 16px; font-weight: 800; color: #111827; text-align: center; margin-bottom: 2px; letter-spacing: -0.3px; }
+  .doc-subtitle { font-size: 10.5px; font-weight: 600; color: #059669; text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #4b5563;
+    padding: 6px 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 10px;
+  }
+  .meta-row strong { color: #111827; }
+  
+  .badge-container { display: flex; gap: 8px; margin-bottom: 10px; }
+  .badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; }
+  .badge-accept { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+  .badge-counter { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+  .badge-protect { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  
+  .observation { margin-bottom: 9px; }
+  
+  .obs-header { display: flex; align-items: center; margin-bottom: 3px; }
+  .obs-number {
+    width: 18px; height: 18px;
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 800; margin-right: 8px; flex-shrink: 0;
+  }
+  .obs-title { font-size: 11.5px; font-weight: 700; color: #111827; }
+  .obs-status { margin-left: auto; font-size: 8.5px; font-weight: 700; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; }
+  .status-green { background: #d1fae5; color: #047857; }
+  .status-amber { background: #fef3c7; color: #b45309; }
+  .status-blue { background: #dbeafe; color: #1e40af; }
+  
+  .obs-body {
+    font-size: 10.2px; line-height: 1.4; color: #1f2937;
+    margin-left: 26px; padding-left: 10px;
+    border-left: 2px solid #10b981;
+  }
+  .obs-body strong { color: #111827; }
+  .counter-box { margin-top: 3px; padding: 4px 8px; background: #f0fdf4; border: 1px dashed #059669; border-radius: 4px; font-size: 9.8px; color: #065f46; }
+
+  .summary-box {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+  }
+  .summary-title { font-size: 11px; font-weight: 800; color: #0f172a; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .summary-text { font-size: 9.8px; line-height: 1.4; color: #334155; }
+
+  .signature-block { margin-top: 12px; display: flex; justify-content: space-between; align-items: flex-end; }
+  .sig-name { font-size: 13px; font-weight: 800; color: #111827; }
+  .sig-title { font-size: 10px; color: #4b5563; font-weight: 600; margin-top: 1px; }
+  .sig-contact { font-size: 9px; color: #6b7280; margin-top: 2px; line-height: 1.35; }
+  
+  .footer {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 8px 36px;
+    border-top: 1.5px solid #e5e7eb;
+    display: flex; justify-content: space-between; align-items: center;
+    background: #fff;
+  }
+  .footer-left, .footer-right { font-size: 8px; color: #6b7280; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+
+<div class="header">
+  <div>
+    <div class="logo-text"><span class="logo-daily">Daily</span><span class="logo-cab">Cab</span><span class="logo-dot"></span></div>
+    <div class="logo-line"></div>
+    <div class="logo-subtitle">DailyCabs Pvt Ltd &bull; Intercity Shuttle Mobility</div>
+  </div>
+  <div class="company-info">
+    <strong>DailyCabs Pvt Ltd</strong><br>
+    15 Bandichhod Marg, Sharda Nagar, Dhar (M.P.) 454001<br>
+    Contact: +91-8109745019 | Email: founder@dailycab.in<br>
+    Web: dailycab.in
+  </div>
+</div>
+
+<div class="content">
+  <div class="doc-title">Project 8 Advisory NDA Amendments — Founder's Evaluation</div>
+  <div class="doc-subtitle">Legal &amp; Business Protection Review for Mandate Execution</div>
+  
+  <div class="meta-row">
+    <div><strong>Date:</strong> 5 September 2026</div>
+    <div><strong>Ref Document:</strong> Project8_DailyCab_NDA_Suggested_Changes.pdf (3 Sept 2026)</div>
+    <div><strong>Reviewed For:</strong> Mr. Sanjay Thakur, Founder &amp; MD</div>
+  </div>
+
+  <!-- Observation 1 -->
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">1</div>
+      <div class="obs-title">Article 1: Standard Carve-Outs to Confidential Information</div>
+      <div class="obs-status status-green">Accept with 1 Tweak</div>
+    </div>
+    <div class="obs-body">
+      Project 8 added standard exceptions (a-d) regarding public info, prior knowledge, third-party disclosure, and independent development. These are standard in 99% of corporate NDAs. <strong>Accept sub-clauses (a) to (d).</strong><br>
+      However, sub-clause (e) excludes agency "ideas, concepts &amp; know-how". To prevent Project 8 from claiming DailyCab's shuttle route models or pooling logic as general know-how, add a brief safeguard:
+      <div class="counter-box">
+        <strong>DailyCab Counter-Text for 1(e):</strong> "...consists of general industry knowledge and experience of the Receiving Party without reference to, incorporation of, or reliance upon DailyCab’s proprietary route algorithms, passenger pool logic, or trade secrets."
+      </div>
+    </div>
+  </div>
+
+  <!-- Observation 2 -->
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">2</div>
+      <div class="obs-title">Article 2: Non-Solicitation Carve-Outs &amp; Investor Non-Circumvention</div>
+      <div class="obs-status status-amber">Accept + Non-Circumvention Proviso</div>
+    </div>
+    <div class="obs-body">
+      Project 8 requests exceptions for pre-existing relationships, independent approaches, and publicly available contacts. This is fair for general hiring/networking, but in a fundraising mandate, publicly available contacts must not compromise investor introductions.
+      <div class="counter-box">
+        <strong>DailyCab Protective Addition:</strong> "Provided that nothing in this clause shall dilute or exempt the Receiving Party from non-circumvention obligations regarding prospective investors or strategic partners introduced to DailyCab during the mandate."
+      </div>
+    </div>
+  </div>
+
+  <!-- Observation 3 -->
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">3</div>
+      <div class="obs-title">Article 3: Deletion of 24-Month Non-Compete &amp; Exclusivity</div>
+      <div class="obs-status status-amber">Accept Deletion + Concurrent Conflict Firewall</div>
+    </div>
+    <div class="obs-body">
+      Project 8 deleted the 24-month post-mandate non-compete. Investment advisory firms routinely reject post-mandate non-competes as they advise multiple startups. <strong>Accepting deletion of the 24-month post-term non-compete is recommended.</strong><br>
+      <strong>Crucial Protection Needed:</strong> Project 8 must NOT simultaneously advise a direct intercity shuttle competitor on DailyCab's core MP routes (Indore-Bhopal/Ujjain) during the active mandate, and "unaided memory" (3.4) must exclude source code, route profitability data, and driver payout logic.
+      <div class="counter-box">
+        <strong>DailyCab Counter-Clause:</strong> Add Clause 3.5: "During the active mandate term, the Receiving Party shall not provide advisory services to a direct intercity shuttle competitor operating on DailyCab's specific active routes in Madhya Pradesh."
+      </div>
+    </div>
+  </div>
+
+  <!-- Observation 4 -->
+  <div class="observation">
+    <div class="obs-header">
+      <div class="obs-number">4</div>
+      <div class="obs-title">Article 6: Deletion of ₹5 Lakh Fixed Penalty</div>
+      <div class="obs-status status-green">Acceptable Compromise</div>
+    </div>
+    <div class="obs-body">
+      Project 8 removed the fixed ₹5,00,000 liquidated damages penalty, replacing it with actual legally recoverable losses under Indian law. Under Sec 74 of Indian Contract Act, court-awarded damages are capped at actual proven loss anyway. Fixed penalty clauses are standard pushback items. <strong>Acceptable compromise</strong> provided DailyCab maintains rights to immediate injunctive relief (court stays against data leak) and full recovery of direct legal costs.
+    </div>
+  </div>
+
+  <!-- Strategic Summary -->
+  <div class="summary-box">
+    <div class="summary-title">Founder Action Plan for Discussion / Call with Project 8</div>
+    <div class="summary-text">
+      1. <strong>Green Flags to Share:</strong> Agree to Article 1(a-d) carve-outs, deletion of 24-mo post-mandate non-compete, and removal of ₹5L fixed penalty.<br>
+      2. <strong>Non-Negotiable Counter-Points:</strong> (i) Concurrent route-competitor firewall during active mandate, (ii) Non-circumvention clause for introduced investors, (iii) Excluding proprietary algorithms from "unaided memory" exception.<br>
+      3. <strong>Next Step:</strong> Email or share these 3 small counter-tweaks to Anish Gaonkar so legal can finalize the NDA within the day.
+    </div>
+  </div>
+
+  <div class="signature-block">
+    <div>
+      <div class="sig-name">Sanjay Thakur</div>
+      <div class="sig-title">Founder &amp; Managing Director, DailyCabs Pvt Ltd</div>
+      <div class="sig-contact">Indore / Dhar, Madhya Pradesh &bull; founder@dailycab.in</div>
+    </div>
+    <div style="text-align: right;">
+      <div style="font-size: 10px; font-weight: 700; color: #059669;">CONFIDENTIAL &bull; FOR INTERNAL USE</div>
+      <div style="font-size: 8.5px; color: #6b7280;">Document Ref: DC/P8-NDA-REV/2026-09-05</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-left">DailyCabs Pvt Ltd &bull; Confidential NDA Review &amp; Strategic Counter-Proposals</div>
+  <div class="footer-right">Page 1 of 1</div>
+</div>
+
+</body>
+</html>

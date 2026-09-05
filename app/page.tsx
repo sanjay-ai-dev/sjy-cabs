@@ -235,6 +235,9 @@ export default function Home() {
           <Link href="/card" className="hover:text-emerald-500 font-bold flex items-center gap-1 underline">
             📇 Visiting Card
           </Link>
+          <Link href="/nda" className="hover:text-emerald-500 font-bold flex items-center gap-1 underline">
+            📝 NDA
+          </Link>
         </div>
       </footer>
 
