@@ -4,6 +4,7 @@ import { SjyCabsLogo } from '@/components/logo';
 import { AppLoader } from '@/components/app-loader';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { WhatsAppCommunityCard } from '@/components/whatsapp-community-card';
+import { CommunityJoinForm, OFFICIAL_WHATSAPP_COMMUNITY_URL } from '@/components/community-join-form';
 import { CarpoolCommunityFeed } from '@/components/carpool-community-feed';
 import { 
   Car, 
@@ -18,12 +19,15 @@ import {
   Zap,
   Calendar,
   Building2,
-  GraduationCap
+  GraduationCap,
+  MessageSquare,
+  Heart,
+  Lock
 } from 'lucide-react';
 
 export const metadata = {
   title: 'Dhar - Indore | Daily Commuters Carpool Community',
-  description: 'Free Carpooling & Daily Commuters Community for Dhar ↔ Indore. Share fuel costs, find daily ride partners, female-safe rides, and cab pools.',
+  description: 'Official WhatsApp Daily Commuters Community for Dhar ↔ Indore ↔ Ujjain. 100% Female-Safe & Verified commute network.',
 };
 
 export default function CarpoolCommunityPage() {
@@ -47,7 +51,7 @@ export default function CarpoolCommunityPage() {
             href="/"
             className="text-xs font-extrabold text-content-secondary hover:text-emerald-500 transition-colors flex items-center gap-1 bg-surface-2 px-3 py-1.5 rounded-xl border border-hairline"
           >
-            <span>🚕 Phase 2 Cab Fleet</span>
+            <span>🚕 Homepage & Shuttle Fleet</span>
           </Link>
           <ThemeToggle />
         </div>
@@ -60,49 +64,53 @@ export default function CarpoolCommunityPage() {
         <div className="text-center space-y-6 max-w-4xl mx-auto pt-2">
           
           <div className="flex flex-wrap items-center justify-center gap-2">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300 px-4 py-1.5 rounded-full text-xs font-extrabold shadow-lg">
-              <Sparkles className="w-4 h-4 text-emerald-500" />
+            <div className="inline-flex items-center gap-2 bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs font-extrabold shadow-lg">
+              <Sparkles className="w-4 h-4 text-amber-300" />
               <span>OFFICIAL DAILY COMMUTERS HUB</span>
             </div>
 
-            <span className="bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5">
-              🚗 Dhar ↔ Indore Corridor
+            <span className="bg-pink-500/10 border border-pink-500/30 text-pink-700 dark:text-pink-300 px-3.5 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5">
+              <Heart className="w-4 h-4 text-pink-500 fill-current" />
+              Female-Safe Verified Group
             </span>
           </div>
 
           <h1 className="text-4xl md:text-6xl font-black font-display tracking-tight leading-[1.1]">
-            🚗 Dhar - Indore - Dhar <br />
+            🚗 Dhar - Indore - Ujjain <br />
             <span className="bg-gradient-to-r from-emerald-600 via-teal-500 to-indigo-600 dark:from-emerald-400 dark:via-teal-300 dark:to-indigo-300 bg-clip-text text-transparent">
               Daily Commuters Community
             </span>
           </h1>
 
           <p className="text-content-secondary text-sm md:text-lg max-w-2xl mx-auto leading-relaxed">
-            Welcome to the official hub for daily commuters traveling between Dhar and Indore! Make your daily commute affordable, safe, and convenient through smart carpooling and shared taxi pools.
+            Welcome to the official hub for daily commuters! Join our closed WhatsApp group to connect with genuine daily travelers, share cab pools, and commute safely every day.
           </p>
 
-          {/* Primary route into the /pool app. This feed is the full firehose;
-              /pool is the guided version that matches a specific trip. */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href={OFFICIAL_WHATSAPP_COMMUNITY_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-tap w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-emerald-600 px-7 py-3.5 text-sm font-black text-white shadow-xl hover:bg-emerald-500 transition-all"
+            >
+              <MessageSquare className="w-5 h-5 fill-current" aria-hidden="true" />
+              Join WhatsApp Group 📲
+            </a>
+
             <Link
               href="/pool"
-              className="inline-flex min-h-tap w-full sm:w-auto items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-700"
+              className="inline-flex min-h-tap w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-hairline bg-surface px-6 py-3.5 text-sm font-bold text-content-secondary transition-colors hover:bg-surface-2 hover:text-content"
             >
               <Navigation className="w-4 h-4" aria-hidden="true" />
               Find a ride for my trip
             </Link>
-            <Link
-              href="/pool/offer"
-              className="inline-flex min-h-tap w-full sm:w-auto items-center justify-center gap-2 rounded-2xl border border-hairline bg-surface px-6 py-3 text-sm font-bold text-content-secondary transition-colors hover:bg-surface-2 hover:text-content"
-            >
-              <Car className="w-4 h-4" aria-hidden="true" />
-              Offer my empty seats
-            </Link>
           </div>
-          <p className="text-micro text-content-muted">
-            Or scroll down to browse every post in the community feed.
-          </p>
 
+        </div>
+
+        {/* EMBEDDED COMMUNITY JOIN FORM */}
+        <div className="max-w-4xl mx-auto">
+          <CommunityJoinForm sourcePage="community_page" />
         </div>
 
         {/* Secured WhatsApp Private Group CTA */}
@@ -152,52 +160,33 @@ export default function CarpoolCommunityPage() {
           </div>
         </div>
 
-        {/* Security & Female Safety Assurance Bar */}
-        <div className="glass-card p-6 border border-hairline rounded-3xl bg-surface-1 space-y-4">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="text-xs font-black text-rose-500 uppercase tracking-wider flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4" /> FEMALE SAFE ENVIRONMENT & SECURITY GUARANTEE
-              </div>
-              <h4 className="text-base font-extrabold text-content">
-                Safe, Verified Commutes for Women & Daily Travelers
-              </h4>
-            </div>
-            
-            <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-content-secondary">
-              <span className="flex items-center gap-1 text-rose-600 dark:text-rose-400 bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/30">
-                🚺 Female Driver / Passenger Option
-              </span>
-              <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30">
-                <Navigation className="w-3.5 h-3.5" /> Live Mobile GPS Tracking
-              </span>
-              <span className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-500/30">
-                ⏳ Automatic Seat Waitlist
-              </span>
-            </div>
+        {/* Community Feed / Posts */}
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-black font-display text-content">
+              Active Community Posts & Ride Requests
+            </h2>
+            <p className="text-xs text-content-secondary">
+              Browse recent carpool offers & seeker requests from daily commuters.
+            </p>
           </div>
+          <CarpoolCommunityFeed />
         </div>
-
-        {/* LIVE CARPOOL COMMUNITY FEED */}
-        <CarpoolCommunityFeed />
 
       </main>
 
       {/* Footer */}
       <footer className="max-w-6xl w-full mx-auto py-6 border-t border-hairline flex flex-col sm:flex-row justify-between items-center text-xs text-content-muted gap-4">
         <div>
-          © 2026 DailyCab Express Community • dailycab.in/community
+          © 2026 DailyCab Express • dailycab.in • Verified Commuter Network
         </div>
         <div className="flex items-center gap-4 text-micro text-content-muted">
-          <span>Dhar ↔ Indore Commuter Hub</span>
+          <span>Dhar • Indore • Ujjain • Dewas</span>
+          <Link href="/" className="hover:text-emerald-500 font-bold flex items-center gap-1 underline">
+            🏠 Home
+          </Link>
           <Link href="/qr" className="hover:text-emerald-500 font-bold flex items-center gap-1 underline">
-            📱 QR Poster
-          </Link>
-          <Link href="/card" className="hover:text-emerald-500 font-bold flex items-center gap-1 underline">
-            📇 Visiting Card
-          </Link>
-          <Link href="/admin/survey" className="hover:text-emerald-500 font-bold flex items-center gap-1 underline">
-            ⚙️ Admin Panel
+            📱 QR Code
           </Link>
         </div>
       </footer>
